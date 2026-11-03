@@ -76,4 +76,3 @@ if user_input:
         respuesta = completion.choices[0].message.content
         st.write(respuesta)
         st.session_state.mensajes.append({"role": "assistant", "content": respuesta})
-    
