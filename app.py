@@ -27,9 +27,12 @@ if user_input:
     with st.chat_message("assistant"):
         url = 'https://api.football-data.org/v4/competitions/CL/matches'
         headers = {'X-Auth-Token': FOOTBALL_API_KEY}
-        res = requests.get(url, headers=headers)
         
-        datos_partidos = str(res.json().get('matches', []))[:1500] if res.status_code == 200 else "Sin datos directos de API en este instante"
+        try:
+            res = requests.get(url, headers=headers, timeout=5)
+            datos_partidos = str(res.json().get('matches', []))[:1500] if res.status_code == 200 else "Sin datos directos de API en este instante"
+        except Exception:
+            datos_partidos = "Sin datos directos de API en este instante"
 
         system_prompt = """
         Eres un Analista Deportivo Cuantitativo de elite y Tipster Experto especializado en DETECCIÓN DE VALOR, CUOTAS ALTAS (20.00 - 30.00+) Y APUESTAS COMBINADAS en Bet365 y casas globales.
@@ -61,7 +64,7 @@ if user_input:
         """
 
         completion = client.chat.completions.create(
-            model="llama3-70b-8192",
+            model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "system", "content": f"Datos en tiempo real: {datos_partidos}"},
@@ -73,3 +76,4 @@ if user_input:
         respuesta = completion.choices[0].message.content
         st.write(respuesta)
         st.session_state.mensajes.append({"role": "assistant", "content": respuesta})
+    
